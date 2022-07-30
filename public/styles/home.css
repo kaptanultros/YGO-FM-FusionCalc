@@ -175,3 +175,43 @@ body {
         font-size: 12px;
     }
 }
+.bottom-0 {
+    bottom: 0;
+}
+.left-0 {
+    left: 0;
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+.result-div {
+    position: relative;
+}
+.jumbotron .remove {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: red;
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+#cardsHand .jumbotron {
+    background: #d1a249;
+}
+#cardsHand .jumbotron .desc {
+    padding: 5px;
+    margin-bottom: 5px;
+    background: #e0c186;
+    border: 2px inset;
+}
+#cardsHand .jumbotron .power {
+    border-top: 1px solid #000;
+}

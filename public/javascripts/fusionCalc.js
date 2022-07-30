@@ -1,5 +1,10 @@
-var outputLeft = document.getElementById("outputarealeft");
-var outputRight = document.getElementById("outputarearight");
+var cardInput = document.getElementById("hand");
+var cardHand = document.getElementById("cardsHand");
+var outputLeft = document.querySelector("#outputarealeft .inner");
+var outputRight = document.querySelector("#outputarearight .inner");
+var cards = [];
+var monsters = [];
+var others = [];
 
 // Initialize Awesomplete
 var _awesompleteOpts = {
@@ -9,10 +14,33 @@ var _awesompleteOpts = {
     autoFirst: true, // The first item in the list is selected
     filter: Awesomplete.FILTER_STARTSWITH, // Case insensitive from start of word
 };
-var handCompletions = {};
-for (i = 1; i <= 5; i++) {
-    var hand = document.getElementById("hand" + i);
-    handCompletions["hand" + i] = new Awesomplete(hand, _awesompleteOpts);
+var hand = document.getElementById("hand");
+new Awesomplete(hand, _awesompleteOpts);
+
+function cardsToHtml(cards) {
+    var cardsHTML = cards
+        .map((card) => {
+            var res =
+                "<div class='jumbotron position-relative grid-5 px-2 py-2 pb-4' id='card-" + card.Id + "' >";
+            res += checkCard(card);
+            res += "<span class='remove' onclick='removeCard(" + card.Id + ")'>X</span>";
+            res += "</div>";
+            return res;
+        })
+        .join("\n");
+
+    cardHand.innerHTML = cardsHTML;
+}
+
+function removeCard(cardId) {
+    for (id in cards) {
+        if (cards[id].Id == cardId) {
+            cards.splice(id, 1);
+        }
+    }
+    cardsToHtml(cards);
+    resultsClear();
+    findFusions();
 }
 
 // Creates a div for each fusion
@@ -20,13 +48,13 @@ function fusesToHTML(fuselist) {
     return fuselist
         .map(function (fusion) {
             var res =
-                "<div class='result-div'>Input: " +
+                "<div class='result-div'><strong>Input:</strong> " +
                 fusion.card1.Name +
-                "<br>Input: " +
+                "<br><strong>Input:</strong> " +
                 fusion.card2.Name;
             if (fusion.result) {
                 // Equips and Results don't have a result field
-                res += "<br>Result: " + fusion.result.Name;
+                res += "<br><strong>Result:</strong> " + fusion.result.Name;
                 if (isMonster(fusion.result)) {
                     res += " " + formatStats(fusion.result.Attack, fusion.result.Defense);
                 } else {
@@ -52,7 +80,11 @@ function getCardById(id) {
 }
 
 function formatStats(attack, defense) {
-    return "(" + attack + "/" + defense + ")";
+    var res = "<div class='row position-absolute bottom-0 left-0 w-100 px-3 m-0 power'>";
+    res += "<div class='text-left col px-0'>🗡️ " + attack + "</div>";
+    res += "<div class='text-right col px-0'>🛡️ " + defense + "</div>";
+    res += "</div>";
+    return res;
 }
 
 // Returns true if the given card is a monster, false if it is magic, ritual,
@@ -61,15 +93,35 @@ function isMonster(card) {
     return card.Type < 20;
 }
 
-function checkCard(cardname, infoname) {
-    var info = $("#" + infoname);
-    var card = getCardByName(cardname);
+function checkCard(card) {
     if (!card) {
-        info.html("Invalid card name");
-    } else if (isMonster(card)) {
-        info.html(formatStats(card.Attack, card.Defense) + " [" + cardTypes[card.Type] + "]");
+        return "Invalid card name";
+        return;
+    }
+    var info = $("#card-" + card.Id);
+    if (isMonster(card)) {
+        var res = [
+            "<div class='position-relative w-100'>" + card.Name + "</div>",
+            "<div class='position-relative w-100'><small>[" + cardTypes[card.Type] + "]</small></div>",
+            "<div class='desc'>",
+            "<div class='position-relative w-100 text-justify'><small><em>" +
+                card.Description +
+                "</em></small></div>",
+            "</div>",
+            formatStats(card.Attack, card.Defense),
+        ];
+        return res.join("\r\n");
     } else {
-        info.html("[" + cardTypes[card.Type] + "]");
+        var res = [
+            "<div class='position-relative w-100'>" + card.Name + "</div>",
+            "<div class='position-relative w-100'><small>[" + cardTypes[card.Type] + "]</small></div>",
+            "<div class='desc'>",
+            "<div class='position-relative w-100 text-justify'><small><em>" +
+                card.Description +
+                "</em></small></div>",
+            "</div>",
+        ];
+        return res.join("\r\n");
     }
 }
 
@@ -81,16 +133,10 @@ function hasFusion(fusionList, card) {
 }
 
 function findFusions() {
-    var cards = [];
-    var monsters = [];
-    var others = [];
-
-    for (i = 1; i <= 5; i++) {
-        var name = $("#hand" + i).val();
-        var card = getCardByName(name);
-        if (card) {
-            cards.push(card);
-        }
+    var name = cardInput.value;
+    var card = getCardByName(name);
+    if (card) {
+        cards.push(card);
     }
 
     var fuses = [];
@@ -113,10 +159,10 @@ function findFusions() {
         }
     }
 
-    outputLeft.innerHTML = "<h2 class='center'>Fusions:</h2>";
+    cardsToHtml(cards);
+
     outputLeft.innerHTML += fusesToHTML(fuses.sort((a, b) => b.result.Attack - a.result.Attack));
 
-    outputRight.innerHTML = "<h2 class='center'>Equips:</h2>";
     outputRight.innerHTML += fusesToHTML(equips);
 }
 
@@ -125,35 +171,30 @@ function resultsClear() {
     outputRight.innerHTML = "";
 }
 
-function inputsClear() {
-    for (i = 1; i <= 5; i++) {
-        $("#hand" + i).val("");
-        $("#hand" + i + "-info").html("");
-    }
-}
-
 // Set up event listeners for each card input
-for (i = 1; i <= 5; i++) {
-    $("#hand" + i).on("change", function () {
-        handCompletions[this.id].select(); // select the currently highlighted element
-        if (this.value === "") {
-            // If the box is cleared, remove the card info
-            $("#" + this.id + "-info").html("");
-        } else {
-            checkCard(this.value, this.id + "-info");
-        }
-        resultsClear();
-        findFusions();
-    });
+// for (i = 1; i <= 5; i++) {
+// $("#hand").on("change", function () {
+//     handCompletions[this.id].select(); // select the currently highlighted element
+//     if (this.value === "") {
+//         // If the box is cleared, remove the card info
+//         $("#" + this.id + "-info").html("");
+//     } else {
+//         checkCard(this.value, this.id + "-info");
+//     }
+//     resultsClear();
+//     // findFusions();
+// });
 
-    $("#hand" + i).on("awesomplete-selectcomplete", function () {
-        checkCard(this.value, this.id + "-info");
-        resultsClear();
-        findFusions();
-    });
-}
+$("#hand").on("awesomplete-selectcomplete", function () {
+    resultsClear();
+    findFusions();
+    // checkCard(this.value, this.id + "-info");
+    this.value = "";
+});
+// }
 
 $("#resetBtn").on("click", function () {
+    cards = [];
+    cardsToHtml(cards);
     resultsClear();
-    inputsClear();
 });

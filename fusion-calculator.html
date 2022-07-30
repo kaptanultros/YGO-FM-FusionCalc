@@ -72,19 +72,11 @@
                     <div class="row my-3">
                         <div class="col">
                             <h3 class="my-3 text-main">ENTER HAND</h3>
-
                             <div class="hand-input-group">
-                                <input type="test" id="hand1" /><span id="hand1-info" class="ml-2"></span
-                                ><br />
-                                <input type="test" id="hand2" /><span id="hand2-info" class="ml-2"></span
-                                ><br />
-                                <input type="test" id="hand3" /><span id="hand3-info" class="ml-2"></span
-                                ><br />
-                                <input type="test" id="hand4" /><span id="hand4-info" class="ml-2"></span
-                                ><br />
-                                <input type="test" id="hand5" /><span id="hand5-info" class="ml-2"></span
-                                ><br />
+                                <input type="test" id="hand" /><span id="hand-info" class="ml-2"></span>
                             </div>
+                            <br />
+                            <div id="cardsHand" class="grid"></div>
                             <br />
                             <button type="button" class="btn btn-danger mt-4" id="resetBtn">
                                 Reset All
@@ -100,11 +92,17 @@
 
                     <div class="row">
                         <div class="col-sm">
-                            <div id="outputarealeft"></div>
+                            <div id="outputarealeft">
+                                <h2 class="center">Fusions:</h2>
+                                <div class="inner"></div>
+                            </div>
                         </div>
 
                         <div class="col-sm">
-                            <div id="outputarearight"></div>
+                            <div id="outputarearight">
+                                <h2 class="center">Equips:</h2>
+                                <div class="inner"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
