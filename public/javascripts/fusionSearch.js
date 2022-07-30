@@ -120,7 +120,7 @@ function searchByName() {
             outputRight.innerHTML = "<h2 class='text-center my-4'>Can be equiped</h2>";
             outputRight.innerHTML += fusesToHTML(equips);
 
-            outputLeft.innerHTML = "<h2 class='text-center my-4'>Fusions</h2>";
+            outputLeft.innerHTML = "<h2 class='text-center my-4'>Fusions (" + fuses.length + ")</h2>";
             outputLeft.innerHTML += fusesToHTML(fuses);
         }
     }
