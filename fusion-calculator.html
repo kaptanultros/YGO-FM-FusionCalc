@@ -71,12 +71,16 @@
                 <div class="col">
                     <div class="row my-3">
                         <div class="col">
-                            <h3 class="my-3 text-main">ENTER HAND</h3>
+                            <h3 class="my-3 text-main">Enter card name</h3>
                             <div class="hand-input-group">
                                 <input type="test" id="hand" /><span id="hand-info" class="ml-2"></span>
                             </div>
                             <br />
-                            <div id="cardsHand" class="grid"></div>
+                            <h3>Cards in hand</h3>
+                            <div id="cardsHand" class="grid cardHolder"></div>
+                            <br />
+                            <h3>Monsters on field</h3>
+                            <div id="cardBoard" class="grid cardHolder"></div>
                             <br />
                             <button type="button" class="btn btn-danger mt-4" id="resetBtn">
                                 Reset All
@@ -140,6 +144,7 @@
         </footer>
         <script type="text/javascript" src="public/javascripts/awesomplete.min.js"></script>
         <script type="text/javascript" src="public/javascripts/jquery-3.5.1.min.js"></script>
+        <script type="text/javascript" src="public/javascripts/Sortable.min.js"></script>
         <script type="text/javascript" src="public/javascripts/bootstrap.bundle.min.js"></script>
         <script type="text/javascript" src="public/javascripts/taffy.js"></script>
         <script type="text/javascript" src="data/cards.js"></script>
