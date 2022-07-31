@@ -1,5 +1,6 @@
 var cardInput = document.getElementById("hand");
 var cardHand = document.getElementById("cardsHand");
+var cardBoard = document.getElementById("cardBoard");
 var outputLeft = document.querySelector("#outputarealeft .inner");
 var outputRight = document.querySelector("#outputarearight .inner");
 var cards = [];
@@ -17,19 +18,23 @@ var _awesompleteOpts = {
 var hand = document.getElementById("hand");
 new Awesomplete(hand, _awesompleteOpts);
 
-function cardsToHtml(cards) {
-    var cardsHTML = cards
-        .map((card) => {
-            var res =
-                "<div class='jumbotron position-relative grid-5 px-2 py-2 pb-4' id='card-" + card.Id + "' >";
-            res += checkCard(card);
-            res += "<span class='remove' onclick='removeCard(" + card.Id + ")'>X</span>";
-            res += "</div>";
-            return res;
-        })
-        .join("\n");
-
-    cardHand.innerHTML = cardsHTML;
+function cardsToHtml(cards, summon = false) {
+    var divToFill = cardHand;
+    if (summon) {
+        divToFill = cardBoard;
+    }
+    divToFill.innerHTML = "";
+    cards.map((card) => {
+        var res = $("<div>", {
+            class: "jumbotron position-relative grid-5 px-2 py-2 pb-4",
+            id: "card-" + card.Id,
+        });
+        res.append(checkCard(card));
+        res.append(
+            "<span class='remove' title='Remove card' onclick='removeCard(" + card.Id + ")'>X</span>"
+        );
+        divToFill.append(res[0]);
+    });
 }
 
 function removeCard(cardId) {
@@ -48,7 +53,7 @@ function fusesToHTML(fuselist) {
     return fuselist
         .map(function (fusion) {
             var res =
-                "<div class='result-div'><strong>Input:</strong> " +
+                "<div class='fusion'><strong>Input:</strong> " +
                 fusion.card1.Name +
                 "<br><strong>Input:</strong> " +
                 fusion.card2.Name;
@@ -61,9 +66,23 @@ function fusesToHTML(fuselist) {
                     res += " [" + cardTypes[fusion.result.Type] + "]";
                 }
             }
+            res +=
+                "<span onclick='summonFusion(" +
+                fusion.card1.Id +
+                "," +
+                fusion.card2.Id +
+                "," +
+                fusion.result.Id +
+                ");' class='summon' title='Summon fusion'>🌟</span>";
             return res + "<br><br></div>";
         })
         .join("\n");
+}
+
+function summonFusion(card1, card2, fusion) {
+    removeCard(card1);
+    removeCard(card2);
+    findFusions(fusion, true);
 }
 
 function getCardByName(cardname) {
@@ -132,22 +151,32 @@ function hasFusion(fusionList, card) {
     return fusionList.some((c) => c.Id === card.Id);
 }
 
-function findFusions() {
-    var name = cardInput.value;
-    var card = getCardByName(name);
+function findFusions(fusion = null, summon = false) {
+    if (!fusion) {
+        var name = cardInput.value;
+        var card = getCardByName(name);
+    } else {
+        var card = getCardById(fusion);
+    }
     if (card) {
-        cards.push(card);
+        if (summon) {
+            monsters.push(card);
+        } else {
+            cards.push(card);
+        }
     }
 
     var fuses = [];
     var equips = [];
 
-    for (i = 0; i < cards.length - 1; i++) {
-        var card1 = cards[i];
+    var totalCards = cards.concat(monsters);
+
+    for (i = 0; i < totalCards.length - 1; i++) {
+        var card1 = totalCards[i];
         var card1Fuses = fusionsList[card1.Id];
         var card1Equips = equipsList[card1.Id];
-        for (j = i + 1; j < cards.length; j++) {
-            var card2 = cards[j];
+        for (j = i + 1; j < totalCards.length; j++) {
+            var card2 = totalCards[j];
             var fusion = card1Fuses.find((f) => f.card === card2.Id);
             if (fusion) {
                 fuses.push({ card1: card1, card2: card2, result: getCardById(fusion.result) });
@@ -159,7 +188,11 @@ function findFusions() {
         }
     }
 
-    cardsToHtml(cards);
+    if (summon) {
+        cardsToHtml(monsters, summon);
+    } else {
+        cardsToHtml(cards, summon);
+    }
 
     outputLeft.innerHTML += fusesToHTML(fuses.sort((a, b) => b.result.Attack - a.result.Attack));
 
@@ -170,20 +203,6 @@ function resultsClear() {
     outputLeft.innerHTML = "";
     outputRight.innerHTML = "";
 }
-
-// Set up event listeners for each card input
-// for (i = 1; i <= 5; i++) {
-// $("#hand").on("change", function () {
-//     handCompletions[this.id].select(); // select the currently highlighted element
-//     if (this.value === "") {
-//         // If the box is cleared, remove the card info
-//         $("#" + this.id + "-info").html("");
-//     } else {
-//         checkCard(this.value, this.id + "-info");
-//     }
-//     resultsClear();
-//     // findFusions();
-// });
 
 $("#hand").on("awesomplete-selectcomplete", function () {
     resultsClear();
@@ -197,4 +216,14 @@ $("#resetBtn").on("click", function () {
     cards = [];
     cardsToHtml(cards);
     resultsClear();
+});
+
+new Sortable(cardHand, {
+    group: "shared", // set both lists to same group
+    animation: 150,
+});
+
+new Sortable(cardBoard, {
+    group: "shared",
+    animation: 150,
 });
