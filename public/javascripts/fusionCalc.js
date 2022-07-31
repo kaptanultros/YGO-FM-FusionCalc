@@ -26,24 +26,33 @@ function cardsToHtml(cards, summon = false) {
     divToFill.innerHTML = "";
     cards.map((card) => {
         var res = $("<div>", {
-            class: "jumbotron position-relative grid-5 px-2 py-2 pb-4",
+            class: "jumbotron card position-relative grid-5 px-2 py-2 pb-4",
             id: "card-" + card.Id,
         });
         res.append(checkCard(card));
         res.append(
-            "<span class='remove' title='Remove card' onclick='removeCard(" + card.Id + ")'>X</span>"
+            "<span class='remove' title='Remove card' onclick='removeCard(" + card.Id + ", this)'>X</span>"
         );
         divToFill.append(res[0]);
     });
 }
 
-function removeCard(cardId) {
-    for (id in cards) {
-        if (cards[id].Id == cardId) {
-            cards.splice(id, 1);
+function removeCard(cardId, el = null) {
+    if (el && el.parentElement.parentElement.id === "cardBoard") {
+        for (id in monsters) {
+            if (monsters[id].Id == cardId) {
+                monsters.splice(id, 1);
+            }
         }
+        el.parentElement.remove();
+    } else {
+        for (id in cards) {
+            if (cards[id].Id == cardId) {
+                cards.splice(id, 1);
+            }
+        }
+        cardsToHtml(cards);
     }
-    cardsToHtml(cards);
     resultsClear();
     findFusions();
 }
@@ -65,15 +74,15 @@ function fusesToHTML(fuselist) {
                 } else {
                     res += " [" + cardTypes[fusion.result.Type] + "]";
                 }
+                res +=
+                    "<span onclick='summonFusion(" +
+                    fusion.card1.Id +
+                    "," +
+                    fusion.card2.Id +
+                    "," +
+                    fusion.result.Id +
+                    ");' class='summon' title='Summon fusion'>🌟</span>";
             }
-            res +=
-                "<span onclick='summonFusion(" +
-                fusion.card1.Id +
-                "," +
-                fusion.card2.Id +
-                "," +
-                fusion.result.Id +
-                ");' class='summon' title='Summon fusion'>🌟</span>";
             return res + "<br><br></div>";
         })
         .join("\n");
@@ -214,8 +223,10 @@ $("#hand").on("awesomplete-selectcomplete", function () {
 
 $("#resetBtn").on("click", function () {
     cards = [];
+    monsters = [];
     cardsToHtml(cards);
     resultsClear();
+    cardBoard.innerHTML = "";
 });
 
 new Sortable(cardHand, {
