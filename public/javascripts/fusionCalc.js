@@ -61,15 +61,20 @@ function removeCard(cardId, el = null) {
 function fusesToHTML(fuselist) {
     return fuselist
         .map(function (fusion) {
-            var res =
-                "<div class='fusion'><strong>Input:</strong> " +
-                fusion.card1.Name +
-                "<br><strong>Input:</strong> " +
-                fusion.card2.Name;
+            var res = "<div class='fusion'>"
             if (fusion.result) {
                 // Equips and Results don't have a result field
-                res += "<br><strong>Result:</strong> " + fusion.result.Name;
+                res += "<br><strong>Result: " + fusion.result.Name + "</strong>";
+			}
+            res += "<br><strong>Input:</strong> " +
+					fusion.card1.Name +
+					"<br><strong>Input:</strong> " +
+					fusion.card2.Name;
+            if (fusion.result) {
+                // Equips and Results don't have a result field
+                //res += "<br><strong>Result: " + fusion.result.Name + "</strong>";
                 if (isMonster(fusion.result)) {
+					res += "<br><strong>Guardian Stars: " + starNames[fusion.result.GuardianStarA] + ", " + starNames[fusion.result.GuardianStarB] + "</strong>"
                     res += " " + formatStats(fusion.result.Attack, fusion.result.Defense);
                 } else {
                     res += " [" + cardTypes[fusion.result.Type] + "]";
